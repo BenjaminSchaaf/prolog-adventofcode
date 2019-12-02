@@ -1,5 +1,3 @@
-:- use_module(library(pio)).
-
 %% Part 1
 fuel(Mass, Fuel) :-
     Fuel is floor(Mass / 3) - 2.
