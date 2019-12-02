@@ -27,9 +27,12 @@ fuel_adjusted(Mass, AdjustedFuel) :-
         (
             Fuel > 0,
             fuel_adjusted(Fuel, FuelFuel),
-            AdjustedFuel is Fuel + FuelFuel);
+            AdjustedFuel is Fuel + FuelFuel
+        );
         (
-            AdjustedFuel is 0)).
+            AdjustedFuel is 0
+        )
+    ).
 
 test_adjusted_fuel :-
     fuel_adjusted(14, 2),

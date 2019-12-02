@@ -17,21 +17,31 @@ intcode(Pointer, Memory, ResultingMemory) :-
     Pointer4 is Pointer + 4,
     nth0(Pointer, Memory, Op),
     (
-        (Op = 99,
-         ResultingMemory = Memory);
-        (nth0(Pointer1, Memory, Val1Index),
-         nth0(Pointer2, Memory, Val2Index),
-         nth0(Pointer3, Memory, ResultIndex),
-         nth0(Val1Index, Memory, Val1),
-         nth0(Val2Index, Memory, Val2),
-         (
-            (Op = 1,
-             Result is Val1 + Val2,
-             replace(Memory, ResultIndex, Result, NextMemory));
-            (Op = 2,
-             Result is Val1 * Val2,
-             replace(Memory, ResultIndex, Result, NextMemory))),
-         intcode(Pointer4, NextMemory, ResultingMemory))).
+        (
+            Op = 99,
+            ResultingMemory = Memory
+        );
+        (
+            nth0(Pointer1, Memory, Val1Index),
+            nth0(Pointer2, Memory, Val2Index),
+            nth0(Pointer3, Memory, ResultIndex),
+            nth0(Val1Index, Memory, Val1),
+            nth0(Val2Index, Memory, Val2),
+            (
+                (
+                    Op = 1,
+                    Result is Val1 + Val2,
+                    replace(Memory, ResultIndex, Result, NextMemory)
+                );
+                (
+                    Op = 2,
+                    Result is Val1 * Val2,
+                    replace(Memory, ResultIndex, Result, NextMemory)
+                )
+            ),
+            intcode(Pointer4, NextMemory, ResultingMemory)
+        )
+    ).
 
 test_intcode :-
     intcode([1, 1, 2, 0, 99], [3, 1, 2, 0, 99]),
