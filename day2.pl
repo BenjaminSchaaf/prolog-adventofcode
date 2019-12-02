@@ -11,10 +11,6 @@ test_replace :-
 intcode(Memory, ResultingMemory) :-
     intcode(0, Memory, ResultingMemory).
 intcode(Pointer, Memory, ResultingMemory) :-
-    Pointer1 is Pointer + 1,
-    Pointer2 is Pointer + 2,
-    Pointer3 is Pointer + 3,
-    Pointer4 is Pointer + 4,
     nth0(Pointer, Memory, Op),
     (
         (
@@ -22,6 +18,10 @@ intcode(Pointer, Memory, ResultingMemory) :-
             ResultingMemory = Memory
         );
         (
+            Pointer1 is Pointer + 1,
+            Pointer2 is Pointer + 2,
+            Pointer3 is Pointer + 3,
+            Pointer4 is Pointer + 4,
             nth0(Pointer1, Memory, Val1Index),
             nth0(Pointer2, Memory, Val2Index),
             nth0(Pointer3, Memory, ResultIndex),
@@ -50,3 +50,8 @@ test_intcode :-
     intcode([2, 4, 4, 5, 99, 0], [2, 4, 4, 5, 99, 9801]),
     intcode([1, 1, 1, 4, 99, 5, 6, 0, 99], [30, 1, 1, 4, 2, 5, 6, 0, 99]),
     intcode([1, 9, 10, 3, 2, 3, 11, 0, 99, 30, 40, 50], [3500, 9, 10, 70, 2, 3, 11, 0, 99, 30, 40, 50]).
+
+
+test :-
+    test_replace(),
+    test_intcode().
