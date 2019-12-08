@@ -140,8 +140,14 @@ test_closest_intersecting_line_distance :-
     closest_intersecting_line_distance("D1,L1", "L1,D1", 2),
     closest_intersecting_line_distance("U9999,R9999", "R9999,U9999", 19998),
     closest_intersecting_line_distance("R8,U5,L5,D3", "U7,R6,D4,L4", 6),
-    closest_intersecting_line_distance("R75,D30,R83,U83,L12,D49,R71,U7,L72", "U62,R66,U55,R34,D71,R55,D58,R83", 159),
-    closest_intersecting_line_distance("R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51", "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7", 135).
+    closest_intersecting_line_distance(
+        "R75,D30,R83,U83,L12,D49,R71,U7,L72",
+        "U62,R66,U55,R34,D71,R55,D58,R83",
+        159),
+    closest_intersecting_line_distance(
+        "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51",
+        "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7",
+        135).
 
 
 least_cost_intersecting_line(Program1, Program2, Cost) :-
@@ -150,7 +156,10 @@ least_cost_intersecting_line(Program1, Program2, Cost) :-
 
 test_least_cost_intersecting_line :-
     least_cost_intersecting_line("R8,U5,L5,D3", "U7,R6,D4,L4", 30),
-    least_cost_intersecting_line("R75,D30,R83,U83,L12,D49,R71,U7,L72", "U62,R66,U55,R34,D71,R55,D58,R83", 610).
+    least_cost_intersecting_line(
+        "R75,D30,R83,U83,L12,D49,R71,U7,L72",
+        "U62,R66,U55,R34,D71,R55,D58,R83",
+        610).
 
 
 test :-

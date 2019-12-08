@@ -34,7 +34,14 @@ shorted_path(RulesString, PathLength) :-
     orbits(Rules, Orbits),
     direct_orbit(Orbits, Start, 'YOU'),
     direct_orbit(Orbits, Goal, 'SAN'),
-    setof(L, (path(Orbits, ['YOU', 'SAN'], Start, Goal, Path), length(Path, L)), [PathLength|_]).
+    setof(
+        L,
+        (
+            path(Orbits, ['YOU', 'SAN'], Start, Goal, Path),
+            length(Path, L)
+        ),
+        [PathLength|_]
+    ).
 
 
 path(_, _, Goal, Goal, []).
@@ -46,4 +53,6 @@ path(Orbits, Visited, Current, Goal, [Current|Path]) :-
 
 test_shorted_path :-
     shorted_path("A)YOU\nA)SAN", 0),
-    shorted_path("COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L\nK)YOU\nI)SAN", 4).
+    shorted_path(
+        "COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L\nK)YOU\nI)SAN",
+        4).
