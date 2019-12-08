@@ -1,3 +1,6 @@
+%% Required for #=
+:- use_module(library(clpfd)).
+
 %% Copied from day 2
 replace([_|Tail], 0, Element, [Element|Tail]).
 replace([Head|Tail], Index, Element, [Head|ResultTail]) :-
@@ -72,8 +75,8 @@ intcode(Pointer, Memory, ResultingMemory, Input, Output) :-
             intcode_parameter(Memory, Pointer, 1, ParameterModes, Val2),
             address(Memory, Pointer, 3, Address),
             (
-                (OpCode = 1, Result is Val1 + Val2);
-                (OpCode = 2, Result is Val1 * Val2);
+                (OpCode = 1, Result #= Val1 + Val2);
+                (OpCode = 2, Result #= Val1 * Val2);
                 (
                     OpCode = 7,
                     (Val1 < Val2 -> Result = 1; Result = 0)
