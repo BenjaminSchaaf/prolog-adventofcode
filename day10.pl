@@ -47,8 +47,8 @@ count_visible_asteroids(Grid, Position, Count) :-
 max_key([Head|Tail], Max) :- max_key_(Tail, Head, Max).
 max_key_([], Current, Current).
 max_key_([Head|Tail], Current, Result) :-
-    Head = result(HeadValue, _),
-    Current = result(CurrentValue, _),
+    Head = -(HeadValue, _),
+    Current = -(CurrentValue, _),
     (
         HeadValue > CurrentValue
         -> max_key_(Tail, Head, Result)
@@ -63,8 +63,8 @@ most_visible_asteroids(Data, Result) :-
         (
             nth0(Y, Grid, Row),
             nth0(X, Row, '#'),
-            count_visible_asteroids(Grid, -(X, Y), C),
-            R = -(C, -(X, Y))
+            count_visible_asteroids(Grid, -(X, Y), Count),
+            R = -(Count, -(X, Y))
         ),
         Counts),
     max_key(Counts, Result).
@@ -170,3 +170,11 @@ test_laser_visibility_list :-
             13-3,
             14-3
         ]).
+
+
+test :-
+    test_asteroid_grid(),
+    test_angle_from_up(),
+    test_most_visible_asteroids(),
+    test_adjacent_keys(),
+    test_laser_visibility_list().
