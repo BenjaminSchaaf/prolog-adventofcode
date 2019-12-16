@@ -107,17 +107,33 @@ intcode(Memory, Input, Output) :-
     current_prolog_flag(gc, GC),
     set_prolog_flag(gc, false),
 
-    intcode(0, 0, M, Input, Output),
+    intcode_(state(0, 0, M), Input, Output),
 
     set_prolog_flag(gc, GC).
-intcode(Pointer, RelativeBase, InitialMemory, Input, Output) :-
+intcode_(State, Input, [Output|OutputTail]) :-
+    intcode_step(State, Input, Output, NextState, InputTail),
+    (
+        NextState = fin;
+        intcode_(NextState, InputTail, OutputTail)
+    ).
+
+
+intcode_step(
+        state(Pointer, RelativeBase, InitialMemory),
+        Input,
+        Output,
+        FinalState,
+        RemainingInput) :-
+    !,
     address(InitialMemory, Pointer, Operation, Memory),
     OpCode is mod(Operation, 100),
     ParameterModes is floor(Operation / 100),
     (
         ( % Stop
             OpCode = 99,
-            Output = []
+            Output = fin,
+            FinalState = fin,
+            RemainingInput = Input
         );
         ( % Input
             OpCode = 3,
@@ -131,7 +147,12 @@ intcode(Pointer, RelativeBase, InitialMemory, Input, Output) :-
                 Value,
                 NextMemory),
             NextPointer is Pointer + 2,
-            intcode(NextPointer, RelativeBase, NextMemory, InputTail, Output)
+            intcode_step(
+                state(NextPointer, RelativeBase, NextMemory),
+                InputTail,
+                Output,
+                FinalState,
+                RemainingInput)
         );
         ( % Output
             OpCode = 4,
@@ -141,11 +162,11 @@ intcode(Pointer, RelativeBase, InitialMemory, Input, Output) :-
                 RelativeBase,
                 0,
                 ParameterModes,
-                Value,
+                Output,
                 NextMemory),
-            Output = [Value|OutputTail],
             NextPointer is Pointer + 2,
-            intcode(NextPointer, RelativeBase, NextMemory, Input, OutputTail)
+            FinalState = state(NextPointer, RelativeBase, NextMemory),
+            RemainingInput = Input
         );
         ( % JMP
             (OpCode = 5; OpCode = 6),
@@ -172,7 +193,12 @@ intcode(Pointer, RelativeBase, InitialMemory, Input, Output) :-
                 );
                 (AfterPointer is Pointer + 3)
             ),
-            intcode(AfterPointer, RelativeBase, NextMemory2, Input, Output)
+            intcode_step(
+                state(AfterPointer, RelativeBase, NextMemory2),
+                Input,
+                Output,
+                FinalState,
+                RemainingInput)
         );
         ( % Modify Relative Base
             (OpCode = 9),
@@ -186,7 +212,12 @@ intcode(Pointer, RelativeBase, InitialMemory, Input, Output) :-
                 NextMemory),
             NextRelativeBase is RelativeBase + Value,
             NextPointer is Pointer + 2,
-            intcode(NextPointer, NextRelativeBase, NextMemory, Input, Output)
+            intcode_step(
+                state(NextPointer, NextRelativeBase, NextMemory),
+                Input,
+                Output,
+                FinalState,
+                RemainingInput)
         );
         ( % Normal Ops
             intcode_parameter(
@@ -228,7 +259,12 @@ intcode(Pointer, RelativeBase, InitialMemory, Input, Output) :-
                 Result,
                 NextMemory3),
             NextPointer is Pointer + 4,
-            intcode(NextPointer, RelativeBase, NextMemory3, Input, Output)
+            intcode_step(
+                state(NextPointer, RelativeBase, NextMemory3),
+                Input,
+                Output,
+                FinalState,
+                RemainingInput)
         )
     ).
 
