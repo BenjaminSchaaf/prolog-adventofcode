@@ -1,4 +1,4 @@
-% Use intcode from day 11
+% Use intcode from day 9
 :- ['day9-fast'].
 
 game(Program, Grid) :-
