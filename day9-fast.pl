@@ -4,9 +4,9 @@
 
 
 padd_term(Term, Size, Result) :-
+    !,
     compound_name_arity(Term, _, S),
-    (
-        S > Size
+    (S > Size
         -> Term = Result
         ; (
             PaddingSize is Size - S + 1,
@@ -44,6 +44,7 @@ test_address :-
 % which is incredibly evil but allows things to be fast. This is extra-logical,
 % sadly.
 set_mem(Memory, Pointer, Value, NextMemory) :-
+    !,
     % Make sure NextMemory is a variable, this makes setarg less error prone
     var(NextMemory),
 
@@ -65,15 +66,18 @@ intcode_parameter(
         Memory, Pointer, RelativeBase, Index, Modes, Parameter, NextMemory) :-
     Mode is mod(floor(Modes / 10**Index), 10),
     AddressPointer is Pointer + Index + 1,
+    !,
     (
         (
             Mode = 0,
+            !,
             address(Memory, AddressPointer, ParameterAddress, IntermediaMemory),
             address(IntermediaMemory, ParameterAddress, Parameter, NextMemory)
         );
-        (Mode = 1, address(Memory, AddressPointer, Parameter, NextMemory));
+        (Mode = 1, !, address(Memory, AddressPointer, Parameter, NextMemory));
         (
             Mode = 2,
+            !,
             address(Memory, AddressPointer, Offset, IntermediaMemory),
             ParameterAddress is RelativeBase + Offset,
             address(IntermediaMemory, ParameterAddress, Parameter, NextMemory)
@@ -84,15 +88,18 @@ intcode_parameter(
 % Results now have parameter modes, so handle those
 intcode_result(
         Memory, Pointer, RelativeBase, Index, Modes, Value, NextMemory) :-
+    !,
     Mode is mod(floor(Modes / 10**Index), 10),
     ResultPointer is Pointer + Index + 1,
     (
         (
             Mode = 0,
+            !,
             address(Memory, ResultPointer, ResultAddress, IntermediateMemory)
         );
         (
             Mode = 2,
+            !,
             address(Memory, ResultPointer, Offset, IntermediateMemory),
             ResultAddress is RelativeBase + Offset
         )
@@ -100,16 +107,23 @@ intcode_result(
     set_mem(IntermediateMemory, ResultAddress, Value, NextMemory).
 
 
-intcode(Memory, Input, Output) :-
+intcode_state(State, Memory) :-
     M =.. [a|Memory],
+    State = state(0, 0, M).
 
+
+intcode(Memory, Input, Output) :-
     % From profiling, gc takes up 97% of cpu time. Disable the GC for intcode.
     current_prolog_flag(gc, GC),
     set_prolog_flag(gc, false),
 
-    intcode_(state(0, 0, M), Input, Output),
+    intcode_state(State, Memory),
+    intcode_(State, Input, Output),
 
     set_prolog_flag(gc, GC).
+
+intcode_(State, Input, []) :-
+    intcode_step(State, Input, fin, fin, _).
 intcode_(State, Input, [Output|OutputTail]) :-
     intcode_step(State, Input, Output, NextState, InputTail),
     (
@@ -131,12 +145,14 @@ intcode_step(
     (
         ( % Stop
             OpCode = 99,
+            !,
             Output = fin,
             FinalState = fin,
             RemainingInput = Input
         );
         ( % Input
             OpCode = 3,
+            !,
             Input = [Value|InputTail],
             intcode_result(
                 Memory,
@@ -156,6 +172,7 @@ intcode_step(
         );
         ( % Output
             OpCode = 4,
+            !,
             intcode_parameter(
                 Memory,
                 Pointer,
@@ -170,6 +187,7 @@ intcode_step(
         );
         ( % JMP
             (OpCode = 5; OpCode = 6),
+            !,
             intcode_parameter(
                 Memory,
                 Pointer,
@@ -202,6 +220,7 @@ intcode_step(
         );
         ( % Modify Relative Base
             (OpCode = 9),
+            !,
             intcode_parameter(
                 Memory,
                 Pointer,
@@ -220,6 +239,7 @@ intcode_step(
                 RemainingInput)
         );
         ( % Normal Ops
+            !,
             intcode_parameter(
                 Memory,
                 Pointer,
