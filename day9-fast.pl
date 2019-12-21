@@ -122,13 +122,14 @@ intcode(Memory, Input, Output) :-
 
     set_prolog_flag(gc, GC).
 
-intcode_(State, Input, []) :-
-    intcode_step(State, Input, fin, fin, _).
-intcode_(State, Input, [Output|OutputTail]) :-
+intcode_(State, Input, Result) :-
     intcode_step(State, Input, Output, NextState, InputTail),
     (
-        NextState = fin;
-        intcode_(NextState, InputTail, OutputTail)
+        (NextState = fin, Result = []);
+        (
+            Result = [Output|OutputTail],
+            intcode_(NextState, InputTail, OutputTail)
+        )
     ).
 
 
